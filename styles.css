@@ -254,6 +254,15 @@ pre {
   outline: 3px solid var(--accent-light);
   border-color: var(--accent);
 }
+.topology-diagram figure {
+  margin: 0;
+}
+.topology-diagram img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
 .ip-calculator-status {
   min-height: 1.55em;
   margin-bottom: 0;
