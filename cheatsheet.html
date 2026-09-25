@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Command Cheatsheet | BYU CCDC Prep</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="page-header"><div class="wrap"><a class="back" href="index.html">← Home</a><h1>Command cheatsheet</h1><p class="muted">Replace angle-bracket placeholders before running commands. Run commands only against your assigned environment.</p></div></header>
+  <main class="wrap">
+    <div class="notice warning"><strong>Operational caution:</strong> Start with read-only checks. Confirm scope before changing users, firewall rules, routes, services, or files. Never scan or access another team.</div>
+
+    <section class="section">
+      <h2>Cross-platform service verification</h2>
+      <p class="muted">Use your assigned public address when validating scored services. These examples are for your own hosts only.</p>
+      <pre># HTTP/HTTPS
+curl -I --max-time 10 http://&lt;public-ip&gt;/
+curl -k -I --max-time 10 https://&lt;public-ip&gt;/
+
+# DNS
+dig @&lt;dns-server&gt; &lt;domain&gt;
+dig +short &lt;domain&gt;
+
+# TCP reachability
+nc -vz -w 5 &lt;public-ip&gt; 21
+nc -vz -w 5 &lt;public-ip&gt; 22
+nc -vz -w 5 &lt;public-ip&gt; 25
+nc -vz -w 5 &lt;public-ip&gt; 110
+
+# SSH
+ssh -o ConnectTimeout=5 &lt;user&gt;@&lt;public-ip&gt;
+
+# TLS / POP3S / HTTPS troubleshooting
+openssl s_client -connect &lt;public-ip&gt;:&lt;port&gt; -servername &lt;hostname&gt;
+
+# Windows equivalents
+Test-NetConnection &lt;public-ip&gt; -Port 22
+Test-NetConnection &lt;public-ip&gt; -Port 110
+Invoke-WebRequest -UseBasicParsing http://&lt;public-ip&gt;/</pre>
+    </section>
+
+    <section class="section">
+      <h2>Ubuntu Server 18.04</h2>
+      <div class="grid-2">
+        <div><h3>Identity and access</h3><pre>whoami
+id
+getent passwd
+getent group
+sudo passwd &lt;username&gt;
+sudo chage -l &lt;username&gt;
+last -F | head -30
+lastlog</pre></div>
+        <div><h3>Network and services</h3><pre>ip addr
+ip route
+ss -tulpn
+sudo systemctl --type=service --state=running
+sudo systemctl status &lt;service&gt;
+sudo systemctl restart &lt;service&gt;
+sudo systemctl list-unit-files --state=enabled</pre></div>
+        <div><h3>Logs and persistence</h3><pre>sudo journalctl -p warning..alert -b
+sudo journalctl -u &lt;service&gt; --since "2 hours ago"
+sudo tail -n 100 /var/log/auth.log
+sudo find /etc/cron* -maxdepth 2 -type f -ls
+crontab -l
+sudo ls -la /etc/ssh/</pre></div>
+        <div><h3>Firewall and packages</h3><pre>sudo ufw status verbose
+sudo iptables -S
+sudo iptables -L -n -v
+apt list --upgradable
+dpkg -l | less
+sudo ss -lntup</pre></div>
+      </div>
+      <p class="muted">If a service is managed by systemd, inspect its status and logs before restarting it. Preserve required content and dependencies.</p>
+    </section>
+
+    <section class="section">
+      <h2>Rocky Linux 9.6</h2>
+      <div class="grid-2">
+        <div><h3>Identity and access</h3><pre>whoami
+id
+getent passwd
+getent group
+sudo passwd &lt;username&gt;
+sudo chage -l &lt;username&gt;
+last -F | head -30
+sudo lastlog</pre></div>
+        <div><h3>Network and services</h3><pre>ip addr
+ip route
+ss -tulpn
+sudo systemctl --type=service --state=running
+sudo systemctl status &lt;service&gt;
+sudo systemctl list-unit-files --state=enabled</pre></div>
+        <div><h3>Logs and security</h3><pre>sudo journalctl -p warning..alert -b
+sudo journalctl -u &lt;service&gt; --since "2 hours ago"
+sudo tail -n 100 /var/log/secure
+sudo ausearch -m USER_LOGIN -ts recent
+sudo find /etc/cron* -maxdepth 2 -type f -ls
+crontab -l</pre></div>
+        <div><h3>Firewall, SELinux, packages</h3><pre>sudo firewall-cmd --state
+sudo firewall-cmd --list-all
+getenforce
+sudo semanage port -l 2&gt;/dev/null | head
+sudo dnf check-update
+rpm -qa | less</pre></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Windows Server 2016 / PowerShell</h2>
+      <div class="grid-2">
+        <div><h3>Identity and access</h3><pre>whoami
+Get-LocalUser
+Get-LocalGroupMember -Group "Administrators"
+$pw = Read-Host "New password" -AsSecureString
+Set-LocalUser -Name "&lt;username&gt;" -Password $pw
+Get-ADUser -Filter * -Properties Enabled,LastLogonDate | Select Name,Enabled,LastLogonDate</pre></div>
+        <div><h3>Network and services</h3><pre>ipconfig /all
+Get-NetIPConfiguration
+Get-NetTCPConnection -State Listen
+Get-Service | Sort-Object Status,DisplayName
+Get-Service -Name "&lt;service&gt;"
+Restart-Service -Name "&lt;service&gt;"
+Test-NetConnection &lt;host&gt; -Port &lt;port&gt;</pre></div>
+        <div><h3>Events and processes</h3><pre>Get-Process | Sort-Object CPU -Descending | Select -First 20
+Get-WinEvent -FilterHashtable @{LogName='Security';Id=4625;StartTime=(Get-Date).AddHours(-2)}
+Get-WinEvent -FilterHashtable @{LogName='Security';Id=4624;StartTime=(Get-Date).AddHours(-2)}
+Get-WinEvent -LogName System -MaxEvents 50
+wevtutil el</pre></div>
+        <div><h3>Persistence and firewall</h3><pre>Get-ScheduledTask | Where-Object State -ne 'Disabled'
+Get-CimInstance Win32_StartupCommand
+Get-NetFirewallProfile
+Get-NetFirewallRule -Enabled True | Select DisplayName,Direction,Action,Profile
+Get-WindowsFeature | Where-Object Installed</pre></div>
+      </div>
+      <p class="muted">AD-specific commands require the appropriate Active Directory module. Do not disable required forwarding or alter AD/DNS dependencies without verifying the effect.</p>
+    </section>
+
+    <section class="section">
+      <h2>VyOS 2025.11</h2>
+      <div class="grid-2">
+        <div><h3>Read-only inspection</h3><pre>show interfaces
+show interfaces ethernet
+show ip route
+show arp
+show firewall
+show nat source rules
+show nat destination rules
+show configuration commands</pre></div>
+        <div><h3>Traffic and system checks</h3><pre>show system uptime
+show system memory
+show log
+monitor traffic interface eth0
+monitor traffic interface eth1
+ping &lt;address&gt;
+traceroute &lt;address&gt;</pre></div>
+        <div><h3>Configuration workflow</h3><pre>configure
+# make one deliberate change
+compare
+commit-confirm 5
+confirm
+save
+exit</pre></div>
+        <div><h3>Safety reminders</h3><pre># Before changing firewall/NAT:
+show configuration commands | match firewall
+show configuration commands | match nat
+
+# Leave configuration mode without committing:
+discard
+exit</pre></div>
+      </div>
+      <p class="muted">Keep the assigned public addresses and required NAT behavior intact. Do not create rules that only allow the scoring engine or block other source IPs.</p>
+    </section>
+
+    <section class="section">
+      <h2>Splunk Enterprise 10.0.2</h2>
+      <p class="muted">Index and sourcetype names may vary. Start by discovering what your own indexer receives.</p>
+      <pre># Discover data coverage
+index=*
+| stats count latest(_time) as latest by index sourcetype host
+| sort - count
+
+# Recent events by host and source
+index=* earliest=-24h
+| stats count by host source sourcetype
+| sort - count
+
+# Failed authentication activity
+index=* earliest=-24h (action=failure OR "failed password" OR "authentication failure" OR EventCode=4625)
+| stats count values(user) as users values(src_ip) as source_ips by host
+| sort - count
+
+# Windows successful and failed logons
+index=* (EventCode=4624 OR EventCode=4625)
+| stats count by host EventCode user src_ip
+| sort - count
+
+# Privileged logons
+index=* (EventCode=4672 OR "special privileges assigned")
+| table _time host user src_ip EventCode Message
+| sort - _time
+
+# Process creation / PowerShell activity
+index=* (EventCode=4688 OR sourcetype=*powershell* OR "New Process")
+| table _time host user ParentImage NewProcessName CommandLine Message
+| sort - _time
+
+# Linux SSH activity
+index=* ("Failed password" OR "Accepted password" OR "Invalid user")
+| table _time host user src_ip source _raw
+| sort - _time
+
+# Splunk health
+index=_internal earliest=-1h
+| stats count by host sourcetype source
+| sort - count</pre>
+      <p class="muted">Do not disable forwarding to the Black Team-controlled indexer. Use your own indexer to improve visibility where permitted.</p>
+    </section>
+
+    <section class="section">
+      <h2>Useful shell patterns</h2>
+      <pre># Search recent authentication records
+sudo grep -iE "fail|invalid|accepted|sudo" /var/log/auth.log /var/log/secure 2&gt;/dev/null | tail -100
+
+# Find listening services and owning processes
+sudo ss -lntup
+
+# Find recently modified files in common configuration areas
+sudo find /etc /var/www -xdev -type f -mmin -180 -ls 2&gt;/dev/null
+
+# PowerShell: save a small command result for later review
+Get-NetTCPConnection -State Listen | Out-File .\listening-ports.txt</pre>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="wrap"><a class="back" href="index.html">← Back to home</a></div></footer>
+</body>
+</html>
