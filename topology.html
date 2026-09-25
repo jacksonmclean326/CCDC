@@ -1,81 +1,297 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Topology | BYU CCDC Prep</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <header class="page-header"><div class="wrap"><a class="back" href="index.html">← Home</a><h1>Competition topology</h1><p class="muted">Use <code>x</code> as your private assigned team number. Never publish the resolved values.</p></div></header>
-  <main class="wrap">
-    <div class="notice warning"><strong>Keep private:</strong> Your team number, resolved public addresses, credentials, and live notes do not belong on this page.</div>
-
-    <section class="section">
-      <h2>Network ranges</h2>
-      <table>
-        <thead><tr><th>Network element</th><th>Address</th><th>Purpose</th></tr></thead>
-        <tbody>
-          <tr><td>Internet gateway/shared DNS</td><td><code>192.168.192.1</code></td><td>Shared upstream gateway and DNS.</td></tr>
-          <tr><td>Shared network</td><td><code>192.168.192.0/18</code></td><td>Competition-wide upstream range.</td></tr>
-          <tr><td>VyOS WAN</td><td><code>192.168.200+x.2</code></td><td>Team public/WAN-side router address.</td></tr>
-          <tr><td>Team WAN subnet</td><td><code>192.168.200+x.0/24</code></td><td>Public-side team range.</td></tr>
-          <tr><td>VyOS LAN</td><td><code>172.16.1.1</code></td><td>Team internal gateway.</td></tr>
-          <tr><td>Team LAN</td><td><code>172.16.1.0/24</code></td><td>Internal team network.</td></tr>
-        </tbody>
-      </table>
-      <p class="muted">The firewall uses 1:1 NAT, so each box has a private and a public address. Scoring checks use the public addresses.</p>
-    </section>
-
-    <section class="section">
-      <h2>Assigned boxes</h2>
-      <table>
-        <thead><tr><th>Hostname</th><th>Private address</th><th>Public address</th><th>Operating system / role</th></tr></thead>
-        <tbody>
-          <tr><td><code>bedrock</code></td><td><code>172.16.1.1</code></td><td><code>192.168.200+x.2</code></td><td>VyOS 2025.11 router/firewall</td></tr>
-          <tr><td><code>iron</code></td><td><code>172.16.1.10</code></td><td><code>192.168.200+x.10</code></td><td>Ubuntu Server 18.04 LTS</td></tr>
-          <tr><td><code>lapis</code></td><td><code>172.16.1.11</code></td><td><code>192.168.200+x.11</code></td><td>Windows Server 2016; AD/DNS functions may be present</td></tr>
-          <tr><td><code>redstone</code></td><td><code>172.16.1.12</code></td><td><code>192.168.200+x.12</code></td><td>Rocky Linux 9.6; Splunk Enterprise 10.0.2</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section class="section">
-      <h2>Logical relationships</h2>
-      <div class="grid-2">
-        <div class="card plain-card"><h3>Internet / shared network</h3><p>Upstream connectivity, shared DNS, and the public side of the team’s VyOS router.</p></div>
-        <div class="card plain-card"><h3>bedrock</h3><p>Routes and filters traffic between the WAN range and the internal <code>172.16.1.0/24</code> network. 1:1 NAT exposes the boxes publicly.</p></div>
-        <div class="card plain-card"><h3>iron, lapis, redstone</h3><p>Internal systems that host scored services and are reachable through their mapped public addresses.</p></div>
-        <div class="card plain-card"><h3>Splunk visibility</h3><p>Ubuntu and Windows forward logs to the team’s Splunk Enterprise indexer and to an additional Black Team-controlled indexer. The latter must remain enabled.</p></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Topology | BYU CCDC Prep</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="wrap">
+        <a class="back" href="index.html">← Home</a>
+        <h1>Competition topology</h1>
+        <p class="muted">
+          Use <code>x</code> as your private assigned team number. Never publish
+          the resolved values.
+        </p>
       </div>
-    </section>
+    </header>
+    <main class="wrap">
+      <div class="notice warning">
+        <strong>Private information:</strong> Team numbers and resolved
+        addresses are sensitive. The calculator runs in this browser tab only
+        and does not save or send the number. Do not publish or share resolved
+        values.
+      </div>
+      <section
+        class="section ip-calculator"
+        aria-labelledby="ip-calculator-title"
+      >
+        <h2 id="ip-calculator-title">Find your public IPs</h2>
+        <label class="team-number-control" for="team-number">
+          Assigned team number
+          <input
+            id="team-number"
+            name="team-number"
+            type="number"
+            inputmode="numeric"
+            step="1"
+            min="0"
+            max="55"
+            aria-describedby="team-number-help team-number-status"
+            autocomplete="off"
+          />
+        </label>
+        <p id="team-number-help" class="muted">
+          Uses the documented formula: third octet = 200 + team number. Leave
+          blank when not in use.
+        </p>
+        <p
+          id="team-number-status"
+          class="ip-calculator-status"
+          aria-live="polite"
+        >
+          Enter your assigned number to calculate the public IPs below.
+        </p>
+      </section>
 
-    <section class="section">
-      <h2>Service map</h2>
-      <table>
-        <thead><tr><th>Service</th><th>Likely dependency or concern</th><th>Validation focus</th></tr></thead>
-        <tbody>
-          <tr><td>HTTP/HTTPS</td><td>Web server, content, and possible application/database dependencies.</td><td>Request expected page through the public address.</td></tr>
-          <tr><td>SSH</td><td>Host access and account authentication.</td><td>Connect using a valid scoring account.</td></tr>
-          <tr><td>FTP</td><td>Service configuration and account authentication.</td><td>Connect and test the expected behavior.</td></tr>
-          <tr><td>AD/DNS</td><td>Directory services and name resolution.</td><td>Test DNS and directory authentication.</td></tr>
-          <tr><td>POP3</td><td>Mail service and account authentication.</td><td>Verify the expected port and login behavior.</td></tr>
-        </tbody>
-      </table>
-    </section>
+      <section class="section">
+        <h2>Network ranges</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Network element</th>
+              <th>Address</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Internet gateway/shared DNS</td>
+              <td><code>192.168.192.1</code></td>
+              <td>Shared upstream gateway and DNS.</td>
+            </tr>
+            <tr>
+              <td>Shared network</td>
+              <td><code>192.168.192.0/18</code></td>
+              <td>Competition-wide upstream range.</td>
+            </tr>
+            <tr>
+              <td>VyOS WAN</td>
+              <td>
+                <code data-public-ip data-host-octet="2">192.168.200+x.2</code>
+              </td>
+              <td>Team public/WAN-side router address.</td>
+            </tr>
+            <tr>
+              <td>Team WAN subnet</td>
+              <td><code data-team-wan-subnet>192.168.200+x.0/24</code></td>
+              <td>Public-side team range.</td>
+            </tr>
+            <tr>
+              <td>VyOS LAN</td>
+              <td><code>172.16.1.1</code></td>
+              <td>Team internal gateway.</td>
+            </tr>
+            <tr>
+              <td>Team LAN</td>
+              <td><code>172.16.1.0/24</code></td>
+              <td>Internal team network.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="muted">
+          The firewall uses 1:1 NAT, so each box has a private and a public
+          address. Scoring checks use the public addresses.
+        </p>
+      </section>
 
-    <section class="section">
-      <h2>Private annotations to add on paper</h2>
-      <ul class="checklist">
-        <li>Assigned team number</li>
-        <li>Resolved public addresses</li>
-        <li>Actual service-to-host placement</li>
-        <li>Credential/PCR status</li>
-        <li>Dependencies discovered during baseline testing</li>
-        <li>Any official inject-specific changes</li>
-      </ul>
-    </section>
-  </main>
-  <footer class="site-footer"><div class="wrap"><a class="back" href="index.html">← Back to home</a></div></footer>
-</body>
+      <section class="section">
+        <h2>Host and IP map</h2>
+        <table>
+          <caption>
+            Each public IP maps via 1:1 NAT to the system in its row; bedrock is
+            the router.
+          </caption>
+          <thead>
+            <tr>
+              <th>Host</th>
+              <th>Private IP (team LAN)</th>
+              <th>Public IP (reaches this host)</th>
+              <th>Operating system / role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>bedrock</code></td>
+              <td><code>172.16.1.1</code></td>
+              <td>
+                <code data-public-ip data-host-octet="2">192.168.200+x.2</code>
+              </td>
+              <td>VyOS 2025.11 router/firewall</td>
+            </tr>
+            <tr>
+              <td><code>iron</code></td>
+              <td><code>172.16.1.10</code></td>
+              <td>
+                <code data-public-ip data-host-octet="10"
+                  >192.168.200+x.10</code
+                >
+              </td>
+              <td>Ubuntu Server 18.04 LTS</td>
+            </tr>
+            <tr>
+              <td><code>lapis</code></td>
+              <td><code>172.16.1.11</code></td>
+              <td>
+                <code data-public-ip data-host-octet="11"
+                  >192.168.200+x.11</code
+                >
+              </td>
+              <td>Windows Server 2016; AD/DNS functions may be present</td>
+            </tr>
+            <tr>
+              <td><code>redstone</code></td>
+              <td><code>172.16.1.12</code></td>
+              <td>
+                <code data-public-ip data-host-octet="12"
+                  >192.168.200+x.12</code
+                >
+              </td>
+              <td>Rocky Linux 9.6; Splunk Enterprise 10.0.2</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>Logical relationships</h2>
+        <div class="grid-2">
+          <div class="card plain-card">
+            <h3>Internet / shared network</h3>
+            <p>
+              Upstream connectivity, shared DNS, and the public side of the
+              team’s VyOS router.
+            </p>
+          </div>
+          <div class="card plain-card">
+            <h3>bedrock</h3>
+            <p>
+              Routes and filters traffic between the WAN range and the internal
+              <code>172.16.1.0/24</code> network. 1:1 NAT exposes the boxes
+              publicly.
+            </p>
+          </div>
+          <div class="card plain-card">
+            <h3>iron, lapis, redstone</h3>
+            <p>
+              Internal systems that host scored services and are reachable
+              through their mapped public addresses.
+            </p>
+          </div>
+          <div class="card plain-card">
+            <h3>Splunk visibility</h3>
+            <p>
+              Ubuntu and Windows forward logs to the team’s Splunk Enterprise
+              indexer and to an additional Black Team-controlled indexer. The
+              latter must remain enabled.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Service map</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Likely dependency or concern</th>
+              <th>Validation focus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>HTTP/HTTPS</td>
+              <td>
+                Web server, content, and possible application/database
+                dependencies.
+              </td>
+              <td>Request expected page through the public address.</td>
+            </tr>
+            <tr>
+              <td>SSH</td>
+              <td>Host access and account authentication.</td>
+              <td>Connect using a valid scoring account.</td>
+            </tr>
+            <tr>
+              <td>FTP</td>
+              <td>Service configuration and account authentication.</td>
+              <td>Connect and test the expected behavior.</td>
+            </tr>
+            <tr>
+              <td>AD/DNS</td>
+              <td>Directory services and name resolution.</td>
+              <td>Test DNS and directory authentication.</td>
+            </tr>
+            <tr>
+              <td>POP3</td>
+              <td>Mail service and account authentication.</td>
+              <td>Verify the expected port and login behavior.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <a class="back" href="index.html">← Back to home</a>
+      </div>
+    </footer>
+    <script>
+      const teamNumberInput = document.querySelector("#team-number");
+      const status = document.querySelector("#team-number-status");
+      const publicIpCells = document.querySelectorAll("[data-public-ip]");
+      const teamWanSubnet = document.querySelector("[data-team-wan-subnet]");
+
+      teamNumberInput.addEventListener("input", () => {
+        const rawTeamNumber = teamNumberInput.value;
+        const teamNumber = Number(rawTeamNumber);
+        const thirdOctet = 200 + teamNumber;
+
+        if (rawTeamNumber === "") {
+          publicIpCells.forEach((cell) => {
+            cell.textContent = `192.168.200+x.${cell.dataset.hostOctet}`;
+          });
+          teamWanSubnet.textContent = "192.168.200+x.0/24";
+          status.textContent =
+            "Enter your assigned number to calculate the public IPs below.";
+          return;
+        }
+
+        if (
+          !Number.isInteger(teamNumber) ||
+          teamNumber < 0 ||
+          thirdOctet > 255 ||
+          thirdOctet < 0
+        ) {
+          publicIpCells.forEach((cell) => {
+            cell.textContent = `192.168.200+x.${cell.dataset.hostOctet}`;
+          });
+          teamWanSubnet.textContent = "192.168.200+x.0/24";
+          status.textContent =
+            "That number does not produce a valid IPv4 address with the documented formula.";
+          return;
+        }
+
+        publicIpCells.forEach((cell) => {
+          cell.textContent = `192.168.${thirdOctet}.${cell.dataset.hostOctet}`;
+        });
+        teamWanSubnet.textContent = `192.168.${thirdOctet}.0/24`;
+        status.textContent =
+          "Calculated from the documented formula. Keep these addresses private.";
+      });
+    </script>
+  </body>
 </html>
