@@ -132,6 +132,23 @@ main {
 .section h3 {
   margin-bottom: 0.35rem;
 }
+.copy-button {
+  padding: 0.55rem 0.85rem;
+  color: #fff;
+  background: var(--accent);
+  border: 0;
+  border-radius: 0.35rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.copy-button:hover {
+  background: #064766;
+}
+.copy-button:focus-visible {
+  outline: 3px solid #7dd3fc;
+  outline-offset: 2px;
+}
 .section > :last-child {
   margin-bottom: 0;
 }

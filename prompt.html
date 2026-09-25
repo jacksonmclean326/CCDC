@@ -12,7 +12,8 @@
     <div class="notice warning"><strong>Competition restriction:</strong> This agent may assist with defensive administration, troubleshooting, and command guidance. It must not write or edit any portion of an inject response.</div>
     <section class="section">
       <h2>Copyable prompt</h2>
-      <pre>You are my defensive system-administration assistant during the 2026 BYU CCDC tryout competition.
+      <button class="copy-button" id="copy-prompt" type="button" aria-live="polite">Copy all text</button>
+      <pre id="prompt-text">You are my defensive system-administration assistant during the 2026 BYU CCDC tryout competition.
 
 ENVIRONMENT
 - bedrock: VyOS 2025.11 router/firewall.
@@ -61,5 +62,34 @@ Ask for the minimum non-secret detail needed, such as hostname, operating system
     </section>
   </main>
   <footer class="site-footer"><div class="wrap"><a class="back" href="index.html">← Back to home</a></div></footer>
+  <script>
+    const copyButton = document.getElementById("copy-prompt");
+    const promptText = document.getElementById("prompt-text");
+
+    copyButton.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(promptText.textContent);
+      } catch {
+        const temporaryInput = document.createElement("textarea");
+        temporaryInput.value = promptText.textContent;
+        temporaryInput.setAttribute("readonly", "");
+        temporaryInput.style.position = "absolute";
+        temporaryInput.style.left = "-9999px";
+        document.body.appendChild(temporaryInput);
+        temporaryInput.select();
+        const copied = document.execCommand("copy");
+        temporaryInput.remove();
+        if (!copied) {
+          copyButton.textContent = "Copy failed";
+          return;
+        }
+      }
+
+      copyButton.textContent = "Copied!";
+      window.setTimeout(() => {
+        copyButton.textContent = "Copy all text";
+      }, 2000);
+    });
+  </script>
 </body>
 </html>
