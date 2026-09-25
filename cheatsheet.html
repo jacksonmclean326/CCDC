@@ -1,237 +1,750 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Command Cheatsheet | BYU CCDC Prep</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <header class="page-header"><div class="wrap"><a class="back" href="index.html">← Home</a><h1>Command cheatsheet</h1><p class="muted">Replace angle-bracket placeholders before running commands. Run commands only against your assigned environment.</p></div></header>
-  <main class="wrap">
-    <div class="notice warning"><strong>Operational caution:</strong> Start with read-only checks. Confirm scope before changing users, firewall rules, routes, services, or files. Never scan or access another team.</div>
-
-    <section class="section">
-      <h2>Cross-platform service verification</h2>
-      <p class="muted">Use your assigned public address when validating scored services. These examples are for your own hosts only.</p>
-      <pre># HTTP/HTTPS
-curl -I --max-time 10 http://&lt;public-ip&gt;/
-curl -k -I --max-time 10 https://&lt;public-ip&gt;/
-
-# DNS
-dig @&lt;dns-server&gt; &lt;domain&gt;
-dig +short &lt;domain&gt;
-
-# TCP reachability
-nc -vz -w 5 &lt;public-ip&gt; 21
-nc -vz -w 5 &lt;public-ip&gt; 22
-nc -vz -w 5 &lt;public-ip&gt; 25
-nc -vz -w 5 &lt;public-ip&gt; 110
-
-# SSH
-ssh -o ConnectTimeout=5 &lt;user&gt;@&lt;public-ip&gt;
-
-# TLS / POP3S / HTTPS troubleshooting
-openssl s_client -connect &lt;public-ip&gt;:&lt;port&gt; -servername &lt;hostname&gt;
-
-# Windows equivalents
-Test-NetConnection &lt;public-ip&gt; -Port 22
-Test-NetConnection &lt;public-ip&gt; -Port 110
-Invoke-WebRequest -UseBasicParsing http://&lt;public-ip&gt;/</pre>
-    </section>
-
-    <section class="section">
-      <h2>Ubuntu Server 18.04</h2>
-      <div class="grid-2">
-        <div><h3>Identity and access</h3><pre>whoami
-id
-getent passwd
-getent group
-sudo passwd &lt;username&gt;
-sudo chage -l &lt;username&gt;
-last -F | head -30
-lastlog</pre></div>
-        <div><h3>Network and services</h3><pre>ip addr
-ip route
-ss -tulpn
-sudo systemctl --type=service --state=running
-sudo systemctl status &lt;service&gt;
-sudo systemctl restart &lt;service&gt;
-sudo systemctl list-unit-files --state=enabled</pre></div>
-        <div><h3>Logs and persistence</h3><pre>sudo journalctl -p warning..alert -b
-sudo journalctl -u &lt;service&gt; --since "2 hours ago"
-sudo tail -n 100 /var/log/auth.log
-sudo find /etc/cron* -maxdepth 2 -type f -ls
-crontab -l
-sudo ls -la /etc/ssh/</pre></div>
-        <div><h3>Firewall and packages</h3><pre>sudo ufw status verbose
-sudo iptables -S
-sudo iptables -L -n -v
-apt list --upgradable
-dpkg -l | less
-sudo ss -lntup</pre></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Command Cheatsheet | BYU CCDC Prep</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="wrap">
+        <a class="back" href="index.html">← Home</a>
+        <h1>Command cheatsheet</h1>
+        <p class="muted">
+          Replace angle-bracket placeholders before running commands. Run
+          commands only against your assigned environment.
+        </p>
       </div>
-      <p class="muted">If a service is managed by systemd, inspect its status and logs before restarting it. Preserve required content and dependencies.</p>
-    </section>
-
-    <section class="section">
-      <h2>Rocky Linux 9.6</h2>
-      <div class="grid-2">
-        <div><h3>Identity and access</h3><pre>whoami
-id
-getent passwd
-getent group
-sudo passwd &lt;username&gt;
-sudo chage -l &lt;username&gt;
-last -F | head -30
-sudo lastlog</pre></div>
-        <div><h3>Network and services</h3><pre>ip addr
-ip route
-ss -tulpn
-sudo systemctl --type=service --state=running
-sudo systemctl status &lt;service&gt;
-sudo systemctl list-unit-files --state=enabled</pre></div>
-        <div><h3>Logs and security</h3><pre>sudo journalctl -p warning..alert -b
-sudo journalctl -u &lt;service&gt; --since "2 hours ago"
-sudo tail -n 100 /var/log/secure
-sudo ausearch -m USER_LOGIN -ts recent
-sudo find /etc/cron* -maxdepth 2 -type f -ls
-crontab -l</pre></div>
-        <div><h3>Firewall, SELinux, packages</h3><pre>sudo firewall-cmd --state
-sudo firewall-cmd --list-all
-getenforce
-sudo semanage port -l 2&gt;/dev/null | head
-sudo dnf check-update
-rpm -qa | less</pre></div>
+    </header>
+    <main class="wrap">
+      <div class="notice warning">
+        <strong>Operational caution:</strong> Start with read-only checks.
+        Confirm scope before changing users, firewall rules, routes, services,
+        or files. Never scan or access another team.
       </div>
-    </section>
 
-    <section class="section">
-      <h2>Windows Server 2016 / PowerShell</h2>
-      <div class="grid-2">
-        <div><h3>Identity and access</h3><pre>whoami
-Get-LocalUser
-Get-LocalGroupMember -Group "Administrators"
-$pw = Read-Host "New password" -AsSecureString
-Set-LocalUser -Name "&lt;username&gt;" -Password $pw
-Get-ADUser -Filter * -Properties Enabled,LastLogonDate | Select Name,Enabled,LastLogonDate</pre></div>
-        <div><h3>Network and services</h3><pre>ipconfig /all
-Get-NetIPConfiguration
-Get-NetTCPConnection -State Listen
-Get-Service | Sort-Object Status,DisplayName
-Get-Service -Name "&lt;service&gt;"
-Restart-Service -Name "&lt;service&gt;"
-Test-NetConnection &lt;host&gt; -Port &lt;port&gt;</pre></div>
-        <div><h3>Events and processes</h3><pre>Get-Process | Sort-Object CPU -Descending | Select -First 20
-Get-WinEvent -FilterHashtable @{LogName='Security';Id=4625;StartTime=(Get-Date).AddHours(-2)}
-Get-WinEvent -FilterHashtable @{LogName='Security';Id=4624;StartTime=(Get-Date).AddHours(-2)}
-Get-WinEvent -LogName System -MaxEvents 50
-wevtutil el</pre></div>
-        <div><h3>Persistence and firewall</h3><pre>Get-ScheduledTask | Where-Object State -ne 'Disabled'
-Get-CimInstance Win32_StartupCommand
-Get-NetFirewallProfile
-Get-NetFirewallRule -Enabled True | Select DisplayName,Direction,Action,Profile
-Get-WindowsFeature | Where-Object Installed</pre></div>
+      <section class="section">
+        <h2>Cross-platform service verification</h2>
+        <p class="muted">
+          Use your assigned public address when validating scored services.
+          These examples are for your own hosts only.
+        </p>
+        <div class="command-list">
+          <div class="command-row">
+            <code>curl -I --max-time 10 http://&lt;public-ip&gt;/</code
+            ><span>Check HTTP headers and response.</span>
+          </div>
+          <div class="command-row">
+            <code>curl -k -I --max-time 10 https://&lt;public-ip&gt;/</code
+            ><span>Check HTTPS headers; ignore certificate validation.</span>
+          </div>
+          <div class="command-row">
+            <code>dig @&lt;dns-server&gt; &lt;domain&gt;</code
+            ><span>Ask a specific DNS server for a full answer.</span>
+          </div>
+          <div class="command-row">
+            <code>dig +short &lt;domain&gt;</code
+            ><span>Show only the resolved address or record.</span>
+          </div>
+          <div class="command-row">
+            <code>nc -vz -w 5 &lt;public-ip&gt; 21</code
+            ><span>Test TCP port 21 (FTP).</span>
+          </div>
+          <div class="command-row">
+            <code>nc -vz -w 5 &lt;public-ip&gt; 22</code
+            ><span>Test TCP port 22 (SSH).</span>
+          </div>
+          <div class="command-row">
+            <code>nc -vz -w 5 &lt;public-ip&gt; 25</code
+            ><span>Test TCP port 25 (SMTP).</span>
+          </div>
+          <div class="command-row">
+            <code>nc -vz -w 5 &lt;public-ip&gt; 110</code
+            ><span>Test TCP port 110 (POP3).</span>
+          </div>
+          <div class="command-row">
+            <code>ssh -o ConnectTimeout=5 &lt;user&gt;@&lt;public-ip&gt;</code
+            ><span>Try SSH with a five-second connection timeout.</span>
+          </div>
+          <div class="command-row">
+            <code
+              >openssl s_client -connect &lt;public-ip&gt;:&lt;port&gt;
+              -servername &lt;hostname&gt;</code
+            ><span>Inspect a TLS connection and certificate.</span>
+          </div>
+          <div class="command-row">
+            <code>Test-NetConnection &lt;public-ip&gt; -Port 22</code
+            ><span>Test SSH TCP reachability from Windows.</span>
+          </div>
+          <div class="command-row">
+            <code>Test-NetConnection &lt;public-ip&gt; -Port 110</code
+            ><span>Test POP3 TCP reachability from Windows.</span>
+          </div>
+          <div class="command-row">
+            <code
+              >Invoke-WebRequest -UseBasicParsing
+              http://&lt;public-ip&gt;/</code
+            ><span>Request a web page from PowerShell.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Ubuntu Server 18.04</h2>
+        <div class="grid-2">
+          <div>
+            <h3>Identity and access</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>whoami</code><span>Print the current username.</span>
+              </div>
+              <div class="command-row">
+                <code>id</code><span>Show current user and group IDs.</span>
+              </div>
+              <div class="command-row">
+                <code>getent passwd</code
+                ><span>List account records from configured sources.</span>
+              </div>
+              <div class="command-row">
+                <code>getent group</code
+                ><span>List group records from configured sources.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo passwd &lt;username&gt;</code
+                ><span>Set that account's password.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo chage -l &lt;username&gt;</code
+                ><span>Show password aging and expiry settings.</span>
+              </div>
+              <div class="command-row">
+                <code>last -F | head -30</code
+                ><span>Show the 30 most recent login sessions.</span>
+              </div>
+              <div class="command-row">
+                <code>lastlog</code
+                ><span>Show each account's most recent login.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Network and services</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>ip addr</code
+                ><span>Show interface addresses and status.</span>
+              </div>
+              <div class="command-row">
+                <code>ip route</code><span>Show the routing table.</span>
+              </div>
+              <div class="command-row">
+                <code>ss -tulpn</code
+                ><span>List listening TCP/UDP sockets and processes.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo systemctl --type=service --state=running</code
+                ><span>List currently running services.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo systemctl status &lt;service&gt;</code
+                ><span>Inspect a service's state and recent output.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo systemctl restart &lt;service&gt;</code
+                ><span>Restart a service; this interrupts it briefly.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo systemctl list-unit-files --state=enabled</code
+                ><span>List units configured to start automatically.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Logs and persistence</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>sudo journalctl -p warning..alert -b</code
+                ><span>Show warning-or-higher logs from this boot.</span>
+              </div>
+              <div class="command-row">
+                <code
+                  >sudo journalctl -u &lt;service&gt; --since "2 hours
+                  ago"</code
+                ><span>Show a service's logs from the last two hours.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo tail -n 100 /var/log/auth.log</code
+                ><span>Show the latest authentication log entries.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo find /etc/cron* -maxdepth 2 -type f -ls</code
+                ><span>List scheduled-job files under cron directories.</span>
+              </div>
+              <div class="command-row">
+                <code>crontab -l</code
+                ><span>List the current user's scheduled jobs.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo ls -la /etc/ssh/</code
+                ><span>List SSH server configuration files.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Firewall and packages</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>sudo ufw status verbose</code
+                ><span>Show UFW firewall status and rules.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo iptables -S</code
+                ><span>Print firewall rules in command form.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo iptables -L -n -v</code
+                ><span
+                  >List firewall rules with counters and numeric
+                  addresses.</span
+                >
+              </div>
+              <div class="command-row">
+                <code>apt list --upgradable</code
+                ><span>List packages with available upgrades.</span>
+              </div>
+              <div class="command-row">
+                <code>dpkg -l | less</code
+                ><span>Page through installed package details.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo ss -lntup</code
+                ><span>List listening TCP/UDP ports and owning processes.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="muted">
+          If a service is managed by systemd, inspect its status and logs before
+          restarting it. Preserve required content and dependencies.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Rocky Linux 9.6</h2>
+        <div class="grid-2">
+          <div>
+            <h3>Identity and access</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>whoami</code><span>Print the current username.</span>
+              </div>
+              <div class="command-row">
+                <code>id</code><span>Show current user and group IDs.</span>
+              </div>
+              <div class="command-row">
+                <code>getent passwd</code
+                ><span>List account records from configured sources.</span>
+              </div>
+              <div class="command-row">
+                <code>getent group</code
+                ><span>List group records from configured sources.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo passwd &lt;username&gt;</code
+                ><span>Set that account's password.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo chage -l &lt;username&gt;</code
+                ><span>Show password aging and expiry settings.</span>
+              </div>
+              <div class="command-row">
+                <code>last -F | head -30</code
+                ><span>Show the 30 most recent login sessions.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo lastlog</code
+                ><span>Show each account's most recent login.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Network and services</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>ip addr</code
+                ><span>Show interface addresses and status.</span>
+              </div>
+              <div class="command-row">
+                <code>ip route</code><span>Show the routing table.</span>
+              </div>
+              <div class="command-row">
+                <code>ss -tulpn</code
+                ><span>List listening TCP/UDP sockets and processes.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo systemctl --type=service --state=running</code
+                ><span>List currently running services.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo systemctl status &lt;service&gt;</code
+                ><span>Inspect a service's state and recent output.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo systemctl list-unit-files --state=enabled</code
+                ><span>List units configured to start automatically.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Logs and security</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>sudo journalctl -p warning..alert -b</code
+                ><span>Show warning-or-higher logs from this boot.</span>
+              </div>
+              <div class="command-row">
+                <code
+                  >sudo journalctl -u &lt;service&gt; --since "2 hours
+                  ago"</code
+                ><span>Show a service's logs from the last two hours.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo tail -n 100 /var/log/secure</code
+                ><span>Show the latest authentication log entries.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo ausearch -m USER_LOGIN -ts recent</code
+                ><span>Search recent audit records for logins.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo find /etc/cron* -maxdepth 2 -type f -ls</code
+                ><span>List scheduled-job files under cron directories.</span>
+              </div>
+              <div class="command-row">
+                <code>crontab -l</code
+                ><span>List the current user's scheduled jobs.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Firewall, SELinux, packages</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>sudo firewall-cmd --state</code
+                ><span>Check whether firewalld is running.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo firewall-cmd --list-all</code
+                ><span>Show active zone settings and firewall rules.</span>
+              </div>
+              <div class="command-row">
+                <code>getenforce</code
+                ><span>Show SELinux enforcement mode.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo semanage port -l 2&gt;/dev/null | head</code
+                ><span>Show the first SELinux port mappings.</span>
+              </div>
+              <div class="command-row">
+                <code>sudo dnf check-update</code
+                ><span>Check for available package updates.</span>
+              </div>
+              <div class="command-row">
+                <code>rpm -qa | less</code
+                ><span>Page through installed package names.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Windows Server 2016 / PowerShell</h2>
+        <div class="grid-2">
+          <div>
+            <h3>Identity and access</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>whoami</code><span>Print the current username.</span>
+              </div>
+              <div class="command-row">
+                <code>Get-LocalUser</code><span>List local user accounts.</span>
+              </div>
+              <div class="command-row">
+                <code>Get-LocalGroupMember -Group "Administrators"</code
+                ><span>List members of the local Administrators group.</span>
+              </div>
+              <div class="command-row">
+                <code>$pw = Read-Host "New password" -AsSecureString</code
+                ><span>Prompt for a password without echoing it.</span>
+              </div>
+              <div class="command-row">
+                <code>Set-LocalUser -Name "&lt;username&gt;" -Password $pw</code
+                ><span>Set a local user's password to the entered value.</span>
+              </div>
+              <div class="command-row">
+                <code
+                  >Get-ADUser -Filter * -Properties Enabled,LastLogonDate |
+                  Select Name,Enabled,LastLogonDate</code
+                ><span>List AD users with enabled state and last logon.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Network and services</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>ipconfig /all</code
+                ><span>Show detailed adapter and DNS configuration.</span>
+              </div>
+              <div class="command-row">
+                <code>Get-NetIPConfiguration</code
+                ><span>Show IP settings for network interfaces.</span>
+              </div>
+              <div class="command-row">
+                <code>Get-NetTCPConnection -State Listen</code
+                ><span>List TCP ports waiting for connections.</span>
+              </div>
+              <div class="command-row">
+                <code>Get-Service | Sort-Object Status,DisplayName</code
+                ><span>List services sorted by state and name.</span>
+              </div>
+              <div class="command-row">
+                <code>Get-Service -Name "&lt;service&gt;"</code
+                ><span>Show the selected service's current state.</span>
+              </div>
+              <div class="command-row">
+                <code>Restart-Service -Name "&lt;service&gt;"</code
+                ><span>Restart a service; this interrupts it briefly.</span>
+              </div>
+              <div class="command-row">
+                <code>Test-NetConnection &lt;host&gt; -Port &lt;port&gt;</code
+                ><span>Test TCP connectivity to a host and port.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Events and processes</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code
+                  >Get-Process | Sort-Object CPU -Descending | Select -First
+                  20</code
+                ><span>Show the 20 processes with highest CPU time.</span>
+              </div>
+              <div class="command-row">
+                <code
+                  >Get-WinEvent -FilterHashtable
+                  @{LogName='Security';Id=4625;StartTime=(Get-Date).AddHours(-2)}</code
+                ><span>Find failed logons from the last two hours.</span>
+              </div>
+              <div class="command-row">
+                <code
+                  >Get-WinEvent -FilterHashtable
+                  @{LogName='Security';Id=4624;StartTime=(Get-Date).AddHours(-2)}</code
+                ><span>Find successful logons from the last two hours.</span>
+              </div>
+              <div class="command-row">
+                <code>Get-WinEvent -LogName System -MaxEvents 50</code
+                ><span>Show the 50 newest System log events.</span>
+              </div>
+              <div class="command-row">
+                <code>wevtutil el</code
+                ><span>List available Windows event logs.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Persistence and firewall</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code
+                  >Get-ScheduledTask | Where-Object State -ne 'Disabled'</code
+                ><span>List scheduled tasks that are not disabled.</span>
+              </div>
+              <div class="command-row">
+                <code>Get-CimInstance Win32_StartupCommand</code
+                ><span>List programs configured to run at startup.</span>
+              </div>
+              <div class="command-row">
+                <code>Get-NetFirewallProfile</code
+                ><span>Show firewall status by network profile.</span>
+              </div>
+              <div class="command-row">
+                <code
+                  >Get-NetFirewallRule -Enabled True | Select
+                  DisplayName,Direction,Action,Profile</code
+                ><span>List enabled firewall rules and their actions.</span>
+              </div>
+              <div class="command-row">
+                <code>Get-WindowsFeature | Where-Object Installed</code
+                ><span>List installed Windows Server roles and features.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="muted">
+          AD-specific commands require the appropriate Active Directory module.
+          Do not disable required forwarding or alter AD/DNS dependencies
+          without verifying the effect.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>VyOS 2025.11</h2>
+        <div class="grid-2">
+          <div>
+            <h3>Read-only inspection</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>show interfaces</code
+                ><span>Show all interfaces and their state.</span>
+              </div>
+              <div class="command-row">
+                <code>show interfaces ethernet</code
+                ><span>Show Ethernet interface details.</span>
+              </div>
+              <div class="command-row">
+                <code>show ip route</code
+                ><span>Show IPv4 routes and next hops.</span>
+              </div>
+              <div class="command-row">
+                <code>show arp</code
+                ><span>Show known IP-to-MAC address mappings.</span>
+              </div>
+              <div class="command-row">
+                <code>show firewall</code
+                ><span>Show firewall configuration and counters.</span>
+              </div>
+              <div class="command-row">
+                <code>show nat source rules</code
+                ><span>Show source NAT rules.</span>
+              </div>
+              <div class="command-row">
+                <code>show nat destination rules</code
+                ><span>Show destination NAT rules.</span>
+              </div>
+              <div class="command-row">
+                <code>show configuration commands</code
+                ><span>Print the active configuration as commands.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Traffic and system checks</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>show system uptime</code
+                ><span>Show how long the router has been running.</span>
+              </div>
+              <div class="command-row">
+                <code>show system memory</code><span>Show memory usage.</span>
+              </div>
+              <div class="command-row">
+                <code>show log</code
+                ><span>Show recent system log messages.</span>
+              </div>
+              <div class="command-row">
+                <code>monitor traffic interface eth0</code
+                ><span>Live-capture traffic on eth0; stop with Ctrl+C.</span>
+              </div>
+              <div class="command-row">
+                <code>monitor traffic interface eth1</code
+                ><span>Live-capture traffic on eth1; stop with Ctrl+C.</span>
+              </div>
+              <div class="command-row">
+                <code>ping &lt;address&gt;</code
+                ><span>Test reachability with ICMP echo requests.</span>
+              </div>
+              <div class="command-row">
+                <code>traceroute &lt;address&gt;</code
+                ><span>Show the network hops toward an address.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Configuration workflow</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>configure</code><span>Enter configuration mode.</span>
+              </div>
+              <div class="command-row">
+                <code>Make one deliberate change</code
+                ><span
+                  >Change only the intended setting in configuration mode.</span
+                >
+              </div>
+              <div class="command-row">
+                <code>compare</code
+                ><span>Review pending changes before applying them.</span>
+              </div>
+              <div class="command-row">
+                <code>commit-confirm 5</code
+                ><span
+                  >Apply changes provisionally; auto-revert after five minutes
+                  unless confirmed.</span
+                >
+              </div>
+              <div class="command-row">
+                <code>confirm</code
+                ><span>Keep the provisional changes and cancel rollback.</span>
+              </div>
+              <div class="command-row">
+                <code>save</code
+                ><span>Save the active configuration to disk.</span>
+              </div>
+              <div class="command-row">
+                <code>exit</code><span>Leave configuration mode.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Safety reminders</h3>
+            <div class="command-list">
+              <div class="command-row">
+                <code>show configuration commands | match firewall</code
+                ><span
+                  >Find firewall settings in the active configuration.</span
+                >
+              </div>
+              <div class="command-row">
+                <code>show configuration commands | match nat</code
+                ><span>Find NAT settings in the active configuration.</span>
+              </div>
+              <div class="command-row">
+                <code>discard</code
+                ><span>Drop pending, uncommitted configuration changes.</span>
+              </div>
+              <div class="command-row">
+                <code>exit</code><span>Leave configuration mode.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="muted">
+          Keep the assigned public addresses and required NAT behavior intact.
+          Do not create rules that only allow the scoring engine or block other
+          source IPs.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Splunk Enterprise 10.0.2</h2>
+        <p class="muted">
+          Index and sourcetype names may vary. Start by discovering what your
+          own indexer receives.
+        </p>
+        <div class="command-list">
+          <div class="command-row query">
+            <code
+              >index=* | stats count latest(_time) as latest by index sourcetype
+              host | sort - count</code
+            ><span
+              >Discover indexes, sources, hosts, event counts, and latest event
+              times.</span
+            >
+          </div>
+          <div class="command-row query">
+            <code
+              >index=* earliest=-24h | stats count by host source sourcetype |
+              sort - count</code
+            ><span
+              >Summarize the last 24 hours of data by host and source.</span
+            >
+          </div>
+          <div class="command-row query">
+            <code
+              >index=* earliest=-24h (action=failure OR "failed password" OR
+              "authentication failure" OR EventCode=4625) | stats count
+              values(user) as users values(src_ip) as source_ips by host | sort
+              - count</code
+            ><span
+              >Count likely failed logons and show related users and source
+              IPs.</span
+            >
+          </div>
+          <div class="command-row query">
+            <code
+              >index=* (EventCode=4624 OR EventCode=4625) | stats count by host
+              EventCode user src_ip | sort - count</code
+            ><span
+              >Compare Windows successful and failed logons by host and
+              user.</span
+            >
+          </div>
+          <div class="command-row query">
+            <code
+              >index=* (EventCode=4672 OR "special privileges assigned") | table
+              _time host user src_ip EventCode Message | sort - _time</code
+            ><span>Review recent privileged logon events.</span>
+          </div>
+          <div class="command-row query">
+            <code
+              >index=* (EventCode=4688 OR sourcetype=*powershell* OR "New
+              Process") | table _time host user ParentImage NewProcessName
+              CommandLine Message | sort - _time</code
+            ><span>Review process-creation and PowerShell events.</span>
+          </div>
+          <div class="command-row query">
+            <code
+              >index=* ("Failed password" OR "Accepted password" OR "Invalid
+              user") | table _time host user src_ip source _raw | sort -
+              _time</code
+            ><span
+              >Review Linux SSH failures, successes, and invalid-user
+              attempts.</span
+            >
+          </div>
+          <div class="command-row query">
+            <code
+              >index=_internal earliest=-1h | stats count by host sourcetype
+              source | sort - count</code
+            ><span>Check recent Splunk internal data by host and source.</span>
+          </div>
+        </div>
+        <p class="muted">
+          Do not disable forwarding to the Black Team-controlled indexer. Use
+          your own indexer to improve visibility where permitted.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Useful shell patterns</h2>
+        <div class="command-list">
+          <div class="command-row">
+            <code
+              >sudo grep -iE "fail|invalid|accepted|sudo" /var/log/auth.log
+              /var/log/secure 2&gt;/dev/null | tail -100</code
+            ><span
+              >Show up to 100 recent matching authentication log lines.</span
+            >
+          </div>
+          <div class="command-row">
+            <code>sudo ss -lntup</code
+            ><span>List listening ports and their owning processes.</span>
+          </div>
+          <div class="command-row">
+            <code
+              >sudo find /etc /var/www -xdev -type f -mmin -180 -ls
+              2&gt;/dev/null</code
+            ><span
+              >List files in these areas modified in the last three hours.</span
+            >
+          </div>
+          <div class="command-row">
+            <code
+              >Get-NetTCPConnection -State Listen | Out-File
+              .\listening-ports.txt</code
+            ><span>Save listening TCP connections to a text file.</span>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <a class="back" href="index.html">← Back to home</a>
       </div>
-      <p class="muted">AD-specific commands require the appropriate Active Directory module. Do not disable required forwarding or alter AD/DNS dependencies without verifying the effect.</p>
-    </section>
-
-    <section class="section">
-      <h2>VyOS 2025.11</h2>
-      <div class="grid-2">
-        <div><h3>Read-only inspection</h3><pre>show interfaces
-show interfaces ethernet
-show ip route
-show arp
-show firewall
-show nat source rules
-show nat destination rules
-show configuration commands</pre></div>
-        <div><h3>Traffic and system checks</h3><pre>show system uptime
-show system memory
-show log
-monitor traffic interface eth0
-monitor traffic interface eth1
-ping &lt;address&gt;
-traceroute &lt;address&gt;</pre></div>
-        <div><h3>Configuration workflow</h3><pre>configure
-# make one deliberate change
-compare
-commit-confirm 5
-confirm
-save
-exit</pre></div>
-        <div><h3>Safety reminders</h3><pre># Before changing firewall/NAT:
-show configuration commands | match firewall
-show configuration commands | match nat
-
-# Leave configuration mode without committing:
-discard
-exit</pre></div>
-      </div>
-      <p class="muted">Keep the assigned public addresses and required NAT behavior intact. Do not create rules that only allow the scoring engine or block other source IPs.</p>
-    </section>
-
-    <section class="section">
-      <h2>Splunk Enterprise 10.0.2</h2>
-      <p class="muted">Index and sourcetype names may vary. Start by discovering what your own indexer receives.</p>
-      <pre># Discover data coverage
-index=*
-| stats count latest(_time) as latest by index sourcetype host
-| sort - count
-
-# Recent events by host and source
-index=* earliest=-24h
-| stats count by host source sourcetype
-| sort - count
-
-# Failed authentication activity
-index=* earliest=-24h (action=failure OR "failed password" OR "authentication failure" OR EventCode=4625)
-| stats count values(user) as users values(src_ip) as source_ips by host
-| sort - count
-
-# Windows successful and failed logons
-index=* (EventCode=4624 OR EventCode=4625)
-| stats count by host EventCode user src_ip
-| sort - count
-
-# Privileged logons
-index=* (EventCode=4672 OR "special privileges assigned")
-| table _time host user src_ip EventCode Message
-| sort - _time
-
-# Process creation / PowerShell activity
-index=* (EventCode=4688 OR sourcetype=*powershell* OR "New Process")
-| table _time host user ParentImage NewProcessName CommandLine Message
-| sort - _time
-
-# Linux SSH activity
-index=* ("Failed password" OR "Accepted password" OR "Invalid user")
-| table _time host user src_ip source _raw
-| sort - _time
-
-# Splunk health
-index=_internal earliest=-1h
-| stats count by host sourcetype source
-| sort - count</pre>
-      <p class="muted">Do not disable forwarding to the Black Team-controlled indexer. Use your own indexer to improve visibility where permitted.</p>
-    </section>
-
-    <section class="section">
-      <h2>Useful shell patterns</h2>
-      <pre># Search recent authentication records
-sudo grep -iE "fail|invalid|accepted|sudo" /var/log/auth.log /var/log/secure 2&gt;/dev/null | tail -100
-
-# Find listening services and owning processes
-sudo ss -lntup
-
-# Find recently modified files in common configuration areas
-sudo find /etc /var/www -xdev -type f -mmin -180 -ls 2&gt;/dev/null
-
-# PowerShell: save a small command result for later review
-Get-NetTCPConnection -State Listen | Out-File .\listening-ports.txt</pre>
-    </section>
-  </main>
-  <footer class="site-footer"><div class="wrap"><a class="back" href="index.html">← Back to home</a></div></footer>
-</body>
+    </footer>
+  </body>
 </html>
