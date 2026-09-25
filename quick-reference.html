@@ -1,105 +1,185 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Quick Reference | BYU CCDC Prep</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <header class="page-header"><div class="wrap"><a class="back" href="index.html">← Home</a><h1>Competition quick reference</h1><p class="muted">Public summary of the packet. Use the official packet and portal announcements as authoritative.</p></div></header>
-  <main class="wrap">
-    <section class="section">
-      <h2>Score priorities</h2>
-      <div class="grid-2">
-        <div><span class="pill">50%</span><h3>Critical services</h3><p>Keep required services available, reachable on the assigned public IPs, and functional with the expected content.</p></div>
-        <div><span class="pill">50%</span><h3>Business injects</h3><p>Complete every task you can and submit every required written response before its deadline.</p></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quick Reference | BYU CCDC Prep</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="wrap">
+        <a class="back" href="index.html">← Home</a>
+        <h1>Competition quick reference</h1>
+        <p class="muted">
+          Public summary of the packet. Use the official packet and portal
+          announcements as authoritative.
+        </p>
       </div>
-      <p>Valid, detailed incident-response reports may recover points lost from Red Team activity. Device reverts cost points and should be treated as a strategic last resort.</p>
-    </section>
+    </header>
+    <main class="wrap">
+      <section class="section">
+        <h2>First 30 minutes</h2>
+        <p class="muted">
+          Suggested pacing, not a competition rule. Follow official packet
+          instructions and portal announcements first; adjust for access delays.
+        </p>
+        <ol class="timeline-checklist">
+          <li>
+            <h3>0-5 min | Change and record passwords</h3>
+            <label
+              ><input type="checkbox" /> Change every required account password
+              on its assigned host, following the official packet.</label
+            >
+            <label
+              ><input type="checkbox" /> Record each updated account, host, and
+              password in approved private credential storage; never on this
+              public site.</label
+            >
+            <label
+              ><input type="checkbox" /> Submit the corresponding Password
+              Change Requests (PCRs) in Quotient.</label
+            >
+          </li>
+          <li>
+            <h3>5-10 min | Map the topology</h3>
+            <label
+              ><input type="checkbox" /> Map each assigned hostname to its
+              private/public address, operating system, and role.</label
+            >
+            <label
+              ><input type="checkbox" /> Mark the router, scored-service hosts,
+              directory/DNS dependencies, and Splunk/log-forwarding paths; keep
+              resolved team addresses private.</label
+            >
+          </li>
+          <li>
+            <h3>10-15 min | Confirm host access</h3>
+            <label
+              ><input type="checkbox" /> Access each assigned host and confirm
+              the expected operating system and role.</label
+            >
+            <label
+              ><input type="checkbox" /> Record inaccessible hosts or unexpected
+              state for investigation.</label
+            >
+          </li>
+          <li>
+            <h3>15-20 min | Verify scored services</h3>
+            <label
+              ><input type="checkbox" /> Test required services through their
+              assigned public addresses.</label
+            >
+            <label
+              ><input type="checkbox" /> Confirm expected authentication and
+              behavior; record failures for follow-up.</label
+            >
+          </li>
+          <li>
+            <h3>20-25 min | Capture a read-only baseline</h3>
+            <label
+              ><input type="checkbox" /> Record users, services, listening
+              ports, routes, firewall/NAT state, and recent logs.</label
+            >
+            <label
+              ><input type="checkbox" /> Flag unfamiliar accounts, processes,
+              scheduled tasks, startup items, or configuration changes for
+              review.</label
+            >
+          </li>
+          <li>
+            <h3>25-30 min | Harden carefully and recheck</h3>
+            <label
+              ><input type="checkbox" /> Address the highest-risk verified issue
+              first; preserve required services, NAT, dependencies, and both
+              required log-forwarding destinations.</label
+            >
+            <label
+              ><input type="checkbox" /> Re-test affected services and check
+              Quotient for injects and deadlines.</label
+            >
+          </li>
+        </ol>
+      </section>
+      <section class="section">
+        <h2>Required services</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>What to preserve</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>HTTP/HTTPS</td>
+              <td>Availability and expected page content.</td>
+            </tr>
+            <tr>
+              <td>SSH</td>
+              <td>Reachability and valid account authentication.</td>
+            </tr>
+            <tr>
+              <td>FTP</td>
+              <td>
+                Reachability, authentication, and inject-specified behavior.
+              </td>
+            </tr>
+            <tr>
+              <td>AD/DNS</td>
+              <td>
+                Directory authentication, name resolution, and dependencies.
+              </td>
+            </tr>
+            <tr>
+              <td>POP3</td>
+              <td>Reachability and expected account/service behavior.</td>
+            </tr>
+            <tr>
+              <td>RDP</td>
+              <td>Where present, valid account login and host availability.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
-    <section class="section">
-      <h2>Required services</h2>
-      <table>
-        <thead><tr><th>Service</th><th>What to preserve</th></tr></thead>
-        <tbody>
-          <tr><td>HTTP/HTTPS</td><td>Availability and expected page content.</td></tr>
-          <tr><td>SSH</td><td>Reachability and valid account authentication.</td></tr>
-          <tr><td>FTP</td><td>Reachability, authentication, and inject-specified behavior.</td></tr>
-          <tr><td>AD/DNS</td><td>Directory authentication, name resolution, and dependencies.</td></tr>
-          <tr><td>POP3</td><td>Reachability and expected account/service behavior.</td></tr>
-          <tr><td>RDP</td><td>Where present, valid account login and host availability.</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section class="section">
-      <h2>Opening priorities</h2>
-      <ol class="checklist">
-        <li>Sign in to the competition services and record your assigned team number privately.</li>
-        <li>Access every assigned VM and confirm the starting state.</li>
-        <li>Change the required scoring credentials immediately.</li>
-        <li>Submit the corresponding PCRs in Quotient.</li>
-        <li>Verify authentication and scored services through the assigned public addresses.</li>
-        <li>Record the baseline: hosts, services, listeners, users, routes, firewall/NAT, and logs.</li>
-        <li>Begin defensive cleanup and hardening while continuously checking service functionality.</li>
-        <li>Monitor Quotient for injects and deadlines throughout the event.</li>
-      </ol>
-    </section>
-
-    <section class="section">
-      <h2>Rules that affect operations</h2>
-      <ul class="checklist">
-        <li>Do not remove any required account. The named accounts are used by scoring checks.</li>
-        <li>Changing credentials requires a Password Change Request (PCR).</li>
-        <li>Keep services on their assigned public IPs and preserve the competition addressing.</li>
-        <li>Do not block source IPs or create rules that only permit the scoring engine.</li>
-        <li>Do not alter a service’s scoring behavior or replace expected content with a shortcut.</li>
-        <li>Do not disable forwarding to the Black Team-controlled Splunk indexer.</li>
-        <li>Do not scan, attack, or access another team’s infrastructure.</li>
-        <li>Use only public, open-source information and avoid paid or account-gated resources during the event.</li>
-        <li>AI tools may assist with system administration, but may not write or edit any part of an inject response.</li>
-        <li>Do not include your personal name on injects; use the assigned team number.</li>
-      </ul>
-    </section>
-
-    <section class="section">
-      <h2>Inject submission requirements</h2>
-      <ul class="checklist">
-        <li>Submit through Quotient before the displayed deadline.</li>
-        <li>Submit a response to every inject requiring a written deliverable, even if incomplete.</li>
-        <li>Use PDF format and the filename pattern <code>team##_inject##.pdf</code>, unless the inject says otherwise.</li>
-        <li>Use the team number, not a personal name.</li>
-        <li>Label and center screenshots, label tables, use consistent formatting, and write for a non-technical audience.</li>
-      </ul>
-    </section>
-
-    <section class="section">
-      <h2>Account roster</h2>
-      <table>
-        <thead><tr><th>Category</th><th>Accounts</th><th>Reminder</th></tr></thead>
-        <tbody>
-          <tr><td>Administrators</td><td><code>steve</code>, <code>alex</code></td><td>Preserve and rotate as appropriate; track by host.</td></tr>
-          <tr><td>Users</td><td><code>enderman</code>, <code>creeper</code>, <code>villager</code>, <code>zombie</code>, <code>enderdragon</code>, <code>irongolem</code>, <code>chickenjockey</code>, <code>ghast</code></td><td>Do not remove; scoring may authenticate with them.</td></tr>
-        </tbody>
-      </table>
-      <p class="muted">Keep actual credentials and PCR records off this public site.</p>
-    </section>
-
-    <section class="section">
-      <h2>Event timing</h2>
-      <table>
-        <thead><tr><th>Time</th><th>Event</th></tr></thead>
-        <tbody>
-          <tr><td>9:00–9:30 AM</td><td>Setup</td></tr>
-          <tr><td>9:30 AM</td><td>Opening remarks</td></tr>
-          <tr><td>10:00 AM</td><td>Competition begins</td></tr>
-          <tr><td>4:00 PM</td><td>Competition ends</td></tr>
-          <tr><td>4:30–5:00 PM</td><td>Results and Red Team debrief</td></tr>
-        </tbody>
-      </table>
-    </section>
-  </main>
-  <footer class="site-footer"><div class="wrap"><a class="back" href="index.html">← Back to home</a></div></footer>
-</body>
+      <section class="section">
+        <h2>Account roster</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Accounts</th>
+              <th>Reminder</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Administrators</td>
+              <td><code>steve</code>, <code>alex</code></td>
+              <td>Preserve and rotate as appropriate; track by host.</td>
+            </tr>
+            <tr>
+              <td>Users</td>
+              <td>
+                <code>enderman</code>, <code>creeper</code>,
+                <code>villager</code>, <code>zombie</code>,
+                <code>enderdragon</code>, <code>irongolem</code>,
+                <code>chickenjockey</code>, <code>ghast</code>
+              </td>
+              <td>Do not remove; scoring may authenticate with them.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="muted">
+          Keep actual credentials and PCR records off this public site.
+        </p>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <a class="back" href="index.html">← Back to home</a>
+      </div>
+    </footer>
+  </body>
 </html>
