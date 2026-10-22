@@ -93,6 +93,23 @@ fi
 keep_ftp="$REPLY"
 
 if [[ "$keep_ssh" == no ]]; then
+    if [[ $EUID -ne 0 ]]; then
+        printf "Root privileges are required to disable SSH. Re-run this script with sudo.\n" >&2
+        exit 1
+    fi
+    if ! command -v systemctl >/dev/null 2>&1; then
+        printf "systemctl is unavailable; cannot disable SSH on this system.\n" >&2
+        exit 1
+    fi
+
+    for socket in ssh.socket sshd.socket; do
+        load_state=$(systemctl show --property=LoadState --value "$socket" 2>/dev/null) || continue
+        if [[ "$load_state" == loaded ]] && ! systemctl disable --now "$socket"; then
+            printf "Failed to stop and disable SSH socket (%s).\n" "$socket" >&2
+            exit 1
+        fi
+    done
+
     disable_service "SSH" ssh.service sshd.service || exit 1
 fi
 
